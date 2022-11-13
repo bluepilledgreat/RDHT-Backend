@@ -4,7 +4,7 @@ ZAvatarRelease
 ZCanary
 ZCanary1
 ZCanary2
-ZCanaryApp
+ZCanaryApps
 ZClientWatcher
 ZFeatureHarmony
 ZFlag
@@ -18,9 +18,3 @@ ZNext
 ZSocialTeam
 ZStudioInt1
 ZStudioInt2
-ZStudioInt3
-ZStudioInt4
-ZStudioInt5
-ZStudioInt6
-ZStudioInt7
-ZStudioInt8
