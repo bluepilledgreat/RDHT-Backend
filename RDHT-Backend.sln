@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDHT-Backend", "RDHT-Backend.csproj", "{119DA17B-51AB-42B8-9E80-65A8230B58C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{119DA17B-51AB-42B8-9E80-65A8230B58C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{119DA17B-51AB-42B8-9E80-65A8230B58C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{119DA17B-51AB-42B8-9E80-65A8230B58C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{119DA17B-51AB-42B8-9E80-65A8230B58C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7AD1EFBC-BFA6-4D1E-8042-A48140E72E12}
+	EndGlobalSection
+EndGlobal
