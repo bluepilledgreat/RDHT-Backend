@@ -1,0 +1,23 @@
+name: RDHT test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: windows-latest
+    env:
+      RDHT_TOKEN:  ${{ secrets.RDHT_TOKEN }}
+      RDHT_USER:  ${{ secrets.RDHT_USER }}
+    steps:
+      - name:  Fetch RDHT-Backend.zip
+        run:   curl -L -s -o "#1" https://github.com/bluepilledgreat/RDHT-Backend/releases/download/v0.0.0-alpha/{RDHT-Backend.zip}
+        shell: cmd
+
+      - name:  Extract RDHT-Backend.zip
+        run:   7z x RDHT-Backend.zip
+        shell: cmd
+        
+      - name:  Run Roblox Deploy History Tracker Backend
+        run:   RDHT-Backend.exe
+        shell: cmd
