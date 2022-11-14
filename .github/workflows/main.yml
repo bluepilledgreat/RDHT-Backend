@@ -1,7 +1,9 @@
-name: RDHT test
+name: RDHT Run
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '*/20 * * * *'
 
 jobs:
   run:
