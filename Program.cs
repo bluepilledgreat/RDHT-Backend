@@ -8,8 +8,8 @@ namespace RDHT_Backend
 {
     internal class Program
     {
-        static readonly string PersonalToken = Environment.GetEnvironmentVariable("RDHT_TOKEN")!;
-        static readonly string AuthUsername = Environment.GetEnvironmentVariable("RDHT_USER")!;
+        static readonly string? PersonalToken = Environment.GetEnvironmentVariable("RDHT_TOKEN");
+        static readonly string? AuthUsername = Environment.GetEnvironmentVariable("RDHT_USER");
 
         static readonly HttpClient Client = new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
         static readonly List<string> BinaryTypes = new List<string>
@@ -43,8 +43,14 @@ namespace RDHT_Backend
             directory.Delete(true);
         }
 
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
+            if (string.IsNullOrEmpty(PersonalToken) || string.IsNullOrEmpty(AuthUsername))
+            {
+                Console.WriteLine("Please add the environment variables!");
+                return 1;
+            }
+
             if (Directory.Exists(ClonePath))
                 ForceDeleteDirectory(ClonePath);
 
@@ -114,6 +120,8 @@ namespace RDHT_Backend
             {
                 Console.WriteLine("No changes");
             }
+
+            return 0;
         }
     }
 }
