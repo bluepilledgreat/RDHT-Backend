@@ -89,7 +89,7 @@ namespace RDHT_Backend
 
                 var channelFile = $"{channel}.txt";
                 var channelPath = ClonePath + channelFile;
-                if ((await File.ReadAllTextAsync(channelFile)) != output)
+                if ((await File.ReadAllTextAsync(channelPath)) != output)
                 {
                     Console.WriteLine($"[{channel}] Changes detected");
                     Changed.Add(channel);
