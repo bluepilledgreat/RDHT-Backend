@@ -13,6 +13,7 @@ namespace RDHT_Backend
         static readonly string? AuthUsername = Environment.GetEnvironmentVariable("RDHT_USER");
 
         static readonly HttpClient Client = new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
+        static List<string> Changed = new List<string>();
         static readonly List<string> BinaryTypes = new List<string>
         {
             // CJV = LUOBU
@@ -82,13 +83,18 @@ namespace RDHT_Backend
                         continue;
                     }
                     var json = JsonSerializer.Deserialize<ClientVersion>(await req.Content.ReadAsStringAsync());
-                    output += $"{binaryType}: {json?.VersionGuid} [{json?.Version}]\n";
+                    output += $"{binaryType}: {json?.VersionGuid} [{json?.Version}]\r\n";
                     Console.WriteLine($"[{channel}] {binaryType} Success");
                 }
 
                 var channelFile = $"{channel}.txt";
                 var channelPath = ClonePath + channelFile;
-                await File.WriteAllTextAsync(channelPath, output);
+                if ((await File.ReadAllTextAsync(channelFile)) != output)
+                {
+                    Console.WriteLine($"[{channel}] Changes detected");
+                    Changed.Add(channel);
+                    await File.WriteAllTextAsync(channelPath, output);
+                }
                 repo.Index.Add(channelFile);
             }
 
@@ -108,7 +114,7 @@ namespace RDHT_Backend
             try
             {
                 var signature = new Signature("Roblox DeployHistory Bot", "rdhb@rdht.local", DateTimeOffset.Now);
-                var commit = repo.Commit("Update channels", signature, signature);
+                var commit = repo.Commit($"Update channels ({string.Join(", ", Changed)})", signature, signature);
                 Console.WriteLine("Committing!");
 
                 var remote = repo.Network.Remotes["origin"];
