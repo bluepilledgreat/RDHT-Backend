@@ -70,7 +70,7 @@ namespace RDHT_Backend
 
             // collect information about channels
             var channelsText = await Client.GetStringAsync("https://raw.githubusercontent.com/bluepilledgreat/RDHT-Backend/main/channels.txt");
-            var channels = channelsText.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var channels = channelsText.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Where(x => !string.IsNullOrEmpty(x));
             foreach (var channel in channels)
             {
                 var output = "";
@@ -89,7 +89,7 @@ namespace RDHT_Backend
 
                 var channelFile = $"{channel}.txt";
                 var channelPath = ClonePath + channelFile;
-                if ((await File.ReadAllTextAsync(channelPath)) != output)
+                if (!File.Exists(channelPath) || (await File.ReadAllTextAsync(channelPath)) != output)
                 {
                     Console.WriteLine($"[{channel}] Changes detected");
                     Changed.Add(channel);
@@ -106,6 +106,7 @@ namespace RDHT_Backend
                 if (!channels.Contains(channel))
                 {
                     Console.WriteLine($"Removing unused channel file `{file}` `{fileName}`");
+                    Changed.Add(channel);
                     File.Delete(file);
                     repo.Index.Remove(fileName);
                 }
