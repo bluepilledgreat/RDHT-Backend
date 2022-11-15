@@ -2,6 +2,7 @@
 using RDHT_Backend.Models;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.Json;
 
 namespace RDHT_Backend
@@ -45,6 +46,8 @@ namespace RDHT_Backend
 
         static async Task<int> Main(string[] args)
         {
+            Console.WriteLine($"RDHT-Backend {Assembly.GetExecutingAssembly().GetName().Version}");
+
             if (string.IsNullOrEmpty(PersonalToken) || string.IsNullOrEmpty(AuthUsername))
             {
                 Console.WriteLine("Please add the environment variables!");
