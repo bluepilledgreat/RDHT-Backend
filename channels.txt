@@ -18,3 +18,4 @@ ZNext
 ZSocialTeam
 ZStudioInt1
 ZStudioInt2
+ZStudioInt3
