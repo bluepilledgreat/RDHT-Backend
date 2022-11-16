@@ -114,8 +114,9 @@ namespace RDHT_Backend
 
             try
             {
-                var signature = new Signature("Roblox DeployHistory Bot", "rdhb@rdht.local", DateTimeOffset.Now);
-                var commit = repo.Commit($"Update channels ({string.Join(", ", Changed)})", signature, signature);
+                var time = DateTimeOffset.Now;
+                var signature = new Signature("Roblox DeployHistory Bot", "rdhb@rdht.local", time);
+                var commit = repo.Commit($"{time.ToString("dd/MM/yyyy HH:mm:ss")} [{string.Join(", ", Changed)}]", signature, signature);
                 Console.WriteLine("Committing!");
 
                 var remote = repo.Network.Remotes["origin"];
