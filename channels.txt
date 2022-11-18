@@ -6,7 +6,6 @@ ZCanary1
 ZCanary2
 ZCanaryApps
 ZClientWatcher
-ZFeatureHarmony
 ZFlag
 ZIntegration
 ZIntegration1
