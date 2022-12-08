@@ -13,6 +13,7 @@ ZIntegration1
 ZLang
 ZLive
 ZLive1
+ZLive2
 ZLoom
 ZNext
 ZSocialTeam
