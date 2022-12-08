@@ -4,6 +4,7 @@ ZAvatarRelease
 ZCanary
 ZCanary1
 ZCanary2
+ZCanary3
 ZCanaryApps
 ZClientWatcher
 ZFlag
