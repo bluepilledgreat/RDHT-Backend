@@ -34,4 +34,4 @@ jobs:
       with:
         name: RDHT-Backend (${{ matrix.configuration }}, ${{ matrix.platform }})
         path: |
-          .\bin\${{ matrix.configuration }}\net6.0-windows\win-${{ matrix.platform }}\publish\*
+          .\bin\${{ matrix.configuration }}\net6.0\win-${{ matrix.platform }}\publish\*
