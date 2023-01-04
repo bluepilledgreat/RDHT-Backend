@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        platform: [x64]
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.x'
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Publish
+      run: dotnet publish -p:PublishSingleFile=true -r win-${{ matrix.platform }} -c ${{ matrix.configuration }} --self-contained false .\RDHT-Backend.csproj
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: RDHT-Backend (${{ matrix.configuration }}, ${{ matrix.platform }})
+        path: |
+          .\bin\${{ matrix.configuration }}\net6.0-windows\win-${{ matrix.platform }}\publish\*
