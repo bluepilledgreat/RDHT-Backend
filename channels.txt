@@ -6,6 +6,7 @@ ZCanary1
 ZCanary2
 ZCanary3
 ZCanary4
+ZCanary5
 ZCanaryApps
 ZClientWatcher
 ZFlag
