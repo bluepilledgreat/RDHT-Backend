@@ -19,5 +19,5 @@ jobs:
         shell: bash
         
       - name:  Run Roblox Deploy History Tracker Backend
-        run:   RDHT-Backend
+        run:   ./RDHT-Backend
         shell: bash
