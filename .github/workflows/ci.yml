@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
-        platform: [x64]
+        platform: [win-x64, linux-x64]
     runs-on: ubuntu-latest
 
     steps:
@@ -26,10 +26,10 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Publish
-      run: dotnet publish -p:PublishSingleFile=true -r win-${{ matrix.platform }} -c ${{ matrix.configuration }} --self-contained false ./RDHT-Backend.csproj
+      run: dotnet publish -p:PublishSingleFile=true -r ${{ matrix.platform }} -c ${{ matrix.configuration }} --self-contained false ./RDHT-Backend.csproj
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: RDHT-Backend (${{ matrix.configuration }}, ${{ matrix.platform }})
         path: |
-          ./bin/${{ matrix.configuration }}/net6.0/win-${{ matrix.platform }}/publish/*
+          ./bin/${{ matrix.configuration }}/net6.0/${{ matrix.platform }}/publish/*
