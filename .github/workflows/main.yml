@@ -7,7 +7,7 @@ on:
 
 jobs:
   run:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     env:
       RDHT_TOKEN:  ${{ secrets.RDHT_TOKEN }}
       RDHT_USER:  ${{ secrets.RDHT_USER }}
