@@ -31,7 +31,9 @@ namespace RDHT_Backend
             "MacStudioCJV"
         };
 
-        static readonly string ClonePath = "./clone/";
+        static readonly string ClonePath = "clone";
+
+        const string TRACKER_REPOSITORY_PATH = "bluepilledgreat/Roblox-DeployHistory-Tracker";
 
         // https://stackoverflow.com/a/8714329
         // git clone generates read only folders & files
@@ -56,9 +58,13 @@ namespace RDHT_Backend
             }
 
             if (Directory.Exists(ClonePath))
+            {
+                Console.WriteLine("Deleting existing clone folder...");
                 ForceDeleteDirectory(ClonePath);
+            }
 
-            var gitPath = Repository.Clone($"http://github.com/bluepilledgreat/Roblox-DeployHistory-Tracker.git", ClonePath);
+            Console.WriteLine("Cloning...");
+            var gitPath = Repository.Clone($"http://github.com/{TRACKER_REPOSITORY_PATH}.git", ClonePath);
             Console.WriteLine(gitPath);
             var repo = new Repository(gitPath);
 
@@ -68,32 +74,39 @@ namespace RDHT_Backend
                 NoCache = true
             };
 
+            // get channel list
+            string channelsPath = Path.Combine(ClonePath, "Channels.json");
+            string channelsStr = await File.ReadAllTextAsync(channelsPath);
+            List<string> channels = JsonSerializer.Deserialize<List<string>>(channelsStr) ?? throw new Exception("Failed to deserialise channels list");
+
+            Console.WriteLine("Starting!");
             // collect information about channels
-            var channelsText = await Client.GetStringAsync("https://raw.githubusercontent.com/bluepilledgreat/RDHT-Backend/main/channels.txt");
-            var channels = channelsText.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Where(x => !string.IsNullOrEmpty(x));
             foreach (var channel in channels)
             {
-                var output = "";
+                List<string> output = new List<string>();
                 foreach (var binaryType in BinaryTypes)
                 {
                     var req = await Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
                     if (!req.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Failure");
+                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode})");
                         continue;
                     }
+
                     var json = JsonSerializer.Deserialize<ClientVersion>(await req.Content.ReadAsStringAsync());
-                    output += $"{binaryType}: {json?.VersionGuid} [{json?.Version}]\r\n";
+                    output.Add($"{binaryType}: {json?.VersionGuid} [{json?.Version}]");
                     Console.WriteLine($"[{channel}] {binaryType} Success");
                 }
 
                 var channelFile = $"{channel}.txt";
-                var channelPath = ClonePath + channelFile;
-                if (!File.Exists(channelPath) || (await File.ReadAllTextAsync(channelPath)) != output)
+                var channelPath = Path.Combine(ClonePath, channelFile);
+
+                // check for any changes
+                if (!File.Exists(channelPath) || !Enumerable.SequenceEqual(await File.ReadAllLinesAsync(channelPath), output.ToArray()))
                 {
                     Console.WriteLine($"[{channel}] Changes detected");
                     Changed.Add(channel);
-                    await File.WriteAllTextAsync(channelPath, output);
+                    await File.WriteAllTextAsync(channelPath, string.Join("\n", output));
                 }
                 repo.Index.Add(channelFile);
             }
