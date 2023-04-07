@@ -18,6 +18,10 @@ jobs:
         run:   7z x RDHT-Backend-Linux.zip
         shell: bash
         
+      - name:  Modify RDHT-Backend Permissions
+        run:   chmod +x ./RDHT-Backend
+        shell: bash
+        
       - name:  Run Roblox Deploy History Tracker Backend
         run:   ./RDHT-Backend
         shell: bash
