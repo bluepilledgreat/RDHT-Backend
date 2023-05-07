@@ -90,7 +90,7 @@ namespace RDHT_Backend
                     string response = await req.Content.ReadAsStringAsync();
                     if (!req.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) {{{response}}}");
+                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}]");
                         continue;
                     }
 
