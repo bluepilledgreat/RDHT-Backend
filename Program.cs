@@ -87,13 +87,14 @@ namespace RDHT_Backend
                 foreach (var binaryType in BinaryTypes)
                 {
                     var req = await Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
+                    string response = await req.Content.ReadAsStringAsync();
                     if (!req.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode})");
+                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) {{{response}}}");
                         continue;
                     }
 
-                    var json = JsonSerializer.Deserialize<ClientVersion>(await req.Content.ReadAsStringAsync());
+                    var json = JsonSerializer.Deserialize<ClientVersion>(response);
                     output.Add($"{binaryType}: {json?.VersionGuid} [{json?.Version}]");
                     Console.WriteLine($"[{channel}] {binaryType} Success");
                 }
