@@ -86,7 +86,7 @@ namespace RDHT_Backend
                 List<string> output = new List<string>();
                 foreach (var binaryType in BinaryTypes)
                 {
-                    for (int i = 1; i <= binaryType.Length; i++)
+                    for (int i = 1; i <= 3; i++)
                     {
                         var req = await Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
                         string response = await req.Content.ReadAsStringAsync();
