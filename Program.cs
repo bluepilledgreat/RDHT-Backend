@@ -107,6 +107,7 @@ namespace RDHT_Backend
                         var json = JsonSerializer.Deserialize<ClientVersion>(response);
                         output.Add($"{binaryType}: {json?.VersionGuid} [{json?.Version}]");
                         Console.WriteLine($"[{channel}] {binaryType} Success");
+                        break;
                     }
                 }
 
