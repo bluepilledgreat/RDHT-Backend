@@ -86,17 +86,28 @@ namespace RDHT_Backend
                 List<string> output = new List<string>();
                 foreach (var binaryType in BinaryTypes)
                 {
-                    var req = await Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
-                    string response = await req.Content.ReadAsStringAsync();
-                    if (!req.IsSuccessStatusCode)
+                    for (int i = 1; i <= binaryType.Length; i++)
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}]");
-                        continue;
-                    }
+                        var req = await Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
+                        string response = await req.Content.ReadAsStringAsync();
 
-                    var json = JsonSerializer.Deserialize<ClientVersion>(response);
-                    output.Add($"{binaryType}: {json?.VersionGuid} [{json?.Version}]");
-                    Console.WriteLine($"[{channel}] {binaryType} Success");
+                        // sometimes clientsettings dies and responds with '{"errors":[{"code":0,"message":"InternalServerError"}]}'
+                        // retry if InternalServerError is the status code and "InternalServerError" is in response, since i dont want to parse json
+                        if (req.StatusCode == HttpStatusCode.InternalServerError && response.Contains("InternalServerError"))
+                        {
+                            Console.WriteLine($"[{channel}] {binaryType} Death, retry {i} ({req.StatusCode}) [{response}]");
+                            continue;
+                        }
+                        else if (!req.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}]");
+                            break;
+                        }
+
+                        var json = JsonSerializer.Deserialize<ClientVersion>(response);
+                        output.Add($"{binaryType}: {json?.VersionGuid} [{json?.Version}]");
+                        Console.WriteLine($"[{channel}] {binaryType} Success");
+                    }
                 }
 
                 var channelFile = $"{channel}.txt";
