@@ -9,31 +9,10 @@ namespace RDHT_Backend
 {
     internal class Program
     {
+#if RELEASE
         static readonly string? PersonalToken = Environment.GetEnvironmentVariable("RDHT_TOKEN");
         static readonly string? AuthUsername = Environment.GetEnvironmentVariable("RDHT_USER");
-
-        static readonly HttpClient Client = new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
-        static List<string> Changed = new List<string>();
-        static readonly List<string> BinaryTypes = new List<string>
-        {
-            // CJV = LUOBU
-            // WINDOWS
-            "WindowsPlayer",
-            "WindowsPlayerCJV",
-            "WindowsStudio",
-            "WindowsStudioCJV",
-            "WindowsStudio64",
-            "WindowsStudio64CJV",
-            // MAC
-            "MacPlayer",
-            "MacPlayerCJV",
-            "MacStudio",
-            "MacStudioCJV"
-        };
-
-        static readonly string ClonePath = "clone";
-
-        const string TRACKER_REPOSITORY_PATH = "bluepilledgreat/Roblox-DeployHistory-Tracker";
+#endif
 
         // https://stackoverflow.com/a/8714329
         // git clone generates read only folders & files
@@ -51,98 +30,68 @@ namespace RDHT_Backend
         {
             Console.WriteLine($"RDHT-Backend {Assembly.GetExecutingAssembly().GetName().Version}");
 
+#if RELEASE
             if (string.IsNullOrEmpty(PersonalToken) || string.IsNullOrEmpty(AuthUsername))
             {
                 Console.WriteLine("Please add the environment variables!");
                 return 1;
             }
+#endif
 
-            if (Directory.Exists(ClonePath))
+            if (Directory.Exists(Globals.ClonePath))
             {
                 Console.WriteLine("Deleting existing clone folder...");
-                ForceDeleteDirectory(ClonePath);
+                ForceDeleteDirectory(Globals.ClonePath);
             }
 
             Console.WriteLine("Cloning...");
-            var gitPath = Repository.Clone($"http://github.com/{TRACKER_REPOSITORY_PATH}.git", ClonePath);
+            var gitPath = Repository.Clone($"http://github.com/{Globals.TrackerRepositoryPath}.git", Globals.ClonePath);
             Console.WriteLine(gitPath);
             var repo = new Repository(gitPath);
 
-            // stop caching
-            Client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
-            {
-                NoCache = true
-            };
-
             // get channel list
-            string channelsPath = Path.Combine(ClonePath, "Channels.json");
+            string channelsPath = Path.Combine(Globals.ClonePath, "Channels.json");
             string channelsStr = await File.ReadAllTextAsync(channelsPath);
+
+            //List<string> channels = new List<string> { "ZIntegration", "ZCanary", "ZNext" };  // FOR TESTING
             List<string> channels = JsonSerializer.Deserialize<List<string>>(channelsStr) ?? throw new Exception("Failed to deserialise channels list");
+            foreach (string channel in channels)
+                Workers.ChannelQueue.Enqueue(channel);
 
             Console.WriteLine("Starting!");
-            // collect information about channels
-            foreach (var channel in channels)
-            {
-                List<string> output = new List<string>();
-                foreach (var binaryType in BinaryTypes)
-                {
-                    for (int i = 1; i <= 3; i++)
-                    {
-                        var req = await Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
-                        string response = await req.Content.ReadAsStringAsync();
 
-                        // sometimes clientsettings dies and responds with '{"errors":[{"code":0,"message":"InternalServerError"}]}'
-                        // retry if InternalServerError is the status code and "InternalServerError" is in response, since i dont want to parse json
-                        if (req.StatusCode == HttpStatusCode.InternalServerError && response.Contains("InternalServerError"))
-                        {
-                            Console.WriteLine($"[{channel}] {binaryType} Death, retry {i} ({req.StatusCode}) [{response}]");
-                            continue;
-                        }
-                        else if (!req.IsSuccessStatusCode)
-                        {
-                            Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}]");
-                            break;
-                        }
+            List<string> changed = new List<string>();
 
-                        var json = JsonSerializer.Deserialize<ClientVersion>(response);
-                        output.Add($"{binaryType}: {json?.VersionGuid} [{json?.Version}]");
-                        Console.WriteLine($"[{channel}] {binaryType} Success");
-                        break;
-                    }
-                }
+            // start the workers
+            List<Task> workers = new List<Task>();
 
-                var channelFile = $"{channel}.txt";
-                var channelPath = Path.Combine(ClonePath, channelFile);
+            // start the appropriate number of workers
+            for (int i = 1; i <= Globals.Workers; i++)
+                workers.Add(Workers.Create(repo, changed));
 
-                // check for any changes
-                if (!File.Exists(channelPath) || !Enumerable.SequenceEqual(await File.ReadAllLinesAsync(channelPath), output.ToArray()))
-                {
-                    Console.WriteLine($"[{channel}] Changes detected");
-                    Changed.Add(channel);
-                    await File.WriteAllTextAsync(channelPath, string.Join("\n", output));
-                }
-                repo.Index.Add(channelFile);
-            }
+            // wait for workers to complete
+            Task.WaitAll(workers.ToArray());
 
             // delete channels removed from the list
-            foreach (var file in Directory.GetFiles(ClonePath, "*.txt"))
+            foreach (var file in Directory.GetFiles(Globals.ClonePath, "*.txt"))
             {
                 var fileName = Path.GetFileName(file);
                 var channel = Path.GetFileNameWithoutExtension(file);
                 if (!channels.Contains(channel))
                 {
                     Console.WriteLine($"Removing unused channel file `{file}` `{fileName}`");
-                    Changed.Add(channel);
+                    changed.Add(channel);
                     File.Delete(file);
                     repo.Index.Remove(fileName);
                 }
             }
 
+#if RELEASE
             try
             {
                 var time = DateTimeOffset.Now;
                 var signature = new Signature("Roblox DeployHistory Bot", "rdhb@rdht.local", time);
-                var commit = repo.Commit($"{time.ToString("dd/MM/yyyy HH:mm:ss")} [{string.Join(", ", Changed)}]", signature, signature);
+                var commit = repo.Commit($"{time.ToString("dd/MM/yyyy HH:mm:ss")} [{string.Join(", ", changed)}]", signature, signature);
                 Console.WriteLine("Committing!");
 
                 var remote = repo.Network.Remotes["origin"];
@@ -157,6 +106,23 @@ namespace RDHT_Backend
             {
                 Console.WriteLine("No changes");
             }
+#else
+            Console.WriteLine("Debug mode has committing disabled.");
+
+            Console.WriteLine("Changed:");
+            if (changed.Count == 0)
+                Console.WriteLine("Nothing!");
+            foreach (string channel in changed)
+                Console.WriteLine(channel);
+
+            Console.WriteLine();
+
+            Console.WriteLine("Repository index:");
+            if (repo.Index.Count == 0)
+                Console.WriteLine("Nothing... not supposed to be like that!");
+            foreach (var entry in repo.Index)
+                Console.WriteLine(entry.Path);
+#endif
 
             return 0;
         }
