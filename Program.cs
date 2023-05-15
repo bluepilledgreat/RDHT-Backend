@@ -72,6 +72,9 @@ namespace RDHT_Backend
             // wait for workers to complete
             Task.WaitAll(workers.ToArray());
 
+            // sort changed list
+            changed.Sort();
+
             // delete channels removed from the list
             foreach (var file in Directory.GetFiles(Globals.ClonePath, "*.txt"))
             {
