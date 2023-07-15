@@ -15,6 +15,22 @@ namespace RDHT_Backend
         public const string ClonePath = "clone";
         public const string TrackerRepositoryPath = "bluepilledgreat/Roblox-DeployHistory-Tracker";
         public const int Workers = 3;
+        public static string[] BinaryTypes { get; } = new string[]
+        {
+            // CJV = LUOBU
+            // WINDOWS
+            "WindowsPlayer",
+            "WindowsPlayerCJV",
+            "WindowsStudio",
+            "WindowsStudioCJV",
+            "WindowsStudio64",
+            "WindowsStudio64CJV",
+            // MAC
+            "MacPlayer",
+            "MacPlayerCJV",
+            "MacStudio",
+            "MacStudioCJV"
+        };
 
         static Globals()
         {

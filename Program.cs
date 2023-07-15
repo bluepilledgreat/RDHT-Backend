@@ -53,21 +53,23 @@ namespace RDHT_Backend
             string channelsPath = Path.Combine(Globals.ClonePath, "Channels.json");
             string channelsStr = await File.ReadAllTextAsync(channelsPath);
 
-            //List<string> channels = new List<string> { "ZIntegration", "ZCanary", "ZNext" };  // FOR TESTING
-            List<string> channels = JsonSerializer.Deserialize<List<string>>(channelsStr) ?? throw new Exception("Failed to deserialise channels list");
-            foreach (string channel in channels)
-                Workers.ChannelQueue.Enqueue(channel);
+            //string[] channelsList = new string[] { "ZIntegration", "ZCanary", "ZNext" };  // FOR TESTING
+            string[] channelsList = JsonSerializer.Deserialize<string[]>(channelsStr) ?? throw new Exception("Failed to deserialise channels list");
+            Queue<string> channels = new Queue<string>();
+
+            foreach (string channel in channelsList)
+                channels.Enqueue(channel);
 
             Console.WriteLine("Starting!");
 
             List<string> changed = new List<string>();
 
             // start the workers
+            WorkerFactory factory = new WorkerFactory(channels, repo, changed);
             List<Task> workers = new List<Task>();
 
-            // start the appropriate number of workers
             for (int i = 1; i <= Globals.Workers; i++)
-                workers.Add(Workers.Create(repo, changed));
+                workers.Add(factory.Create());
 
             // wait for workers to complete
             Task.WaitAll(workers.ToArray());
@@ -80,7 +82,7 @@ namespace RDHT_Backend
             {
                 var fileName = Path.GetFileName(file);
                 var channel = Path.GetFileNameWithoutExtension(file);
-                if (!channels.Contains(channel))
+                if (!channelsList.Contains(channel))
                 {
                     Console.WriteLine($"Removing unused channel file `{file}` `{fileName}`");
                     changed.Add(channel);
