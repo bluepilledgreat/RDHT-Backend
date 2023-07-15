@@ -42,6 +42,14 @@ namespace RDHT_Backend
                         Console.WriteLine($"[{channel}] {binaryType} Death, retry {i} ({req.StatusCode}) [{response}]");
                         continue;
                     }
+                    // sometimes clientsettings dies [2]
+                    // this time, we cant do anything about it
+                    else if (response.Contains("Adaptive Concurrency Limits Enforced"))
+                    {
+                        Console.WriteLine("CLIENTSETTINGS IS DEAD!!!");
+                        Environment.Exit(1337);
+                        throw new Exception("CLIENTSETTINGS IS DEAD!!!");
+                    }
                     else if (!req.IsSuccessStatusCode)
                     {
                         Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}]");
