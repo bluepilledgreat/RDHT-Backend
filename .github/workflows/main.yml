@@ -12,6 +12,10 @@ jobs:
       RDHT_TOKEN:  ${{ secrets.RDHT_TOKEN }}
       RDHT_USER:  ${{ secrets.RDHT_USER }}
     steps:
+      - uses: actions/setup-dotnet@v3
+        with:
+        dotnet-version: '6.x'
+
       - name:  Fetch RDHT-Backend-Linux.zip
         run:   curl -L -s -o "#1" https://github.com/bluepilledgreat/RDHT-Backend/releases/latest/download/{RDHT-Backend-Linux.zip}
         shell: bash
