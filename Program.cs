@@ -38,7 +38,7 @@ namespace RDHT_Backend
             }
 #endif
 
-            Config.Fetch();
+            await Config.Fetch();
 
             if (Directory.Exists(Globals.ClonePath))
             {

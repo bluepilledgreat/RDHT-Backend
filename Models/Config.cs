@@ -15,7 +15,7 @@ namespace RDHT_Backend.Models
         public int MaxChannelGetRetries { get; set; } = 3;
         public int RatelimitWaitTime { get; set; } = 15;
 
-        public static async void Fetch()
+        public static async Task Fetch()
         {
             const string url = $"https://raw.githubusercontent.com/{Globals.BackendTrackerRepositoryPath}/refs/heads/main/Config.json";
             string contents;
