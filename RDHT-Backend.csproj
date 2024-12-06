@@ -14,4 +14,10 @@
     <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
   </ItemGroup>
 
+  <ItemGroup Condition="$(Configuration) == 'Debug'">
+    <None Update="Config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

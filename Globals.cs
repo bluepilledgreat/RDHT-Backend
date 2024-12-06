@@ -13,8 +13,8 @@ namespace RDHT_Backend
     {
         public static readonly HttpClient Client;
         public const string ClonePath = "clone";
+        public const string BackendTrackerRepositoryPath = "bluepilledgreat/RDHT-Backend";
         public const string TrackerRepositoryPath = "bluepilledgreat/Roblox-DeployHistory-Tracker";
-        public const int Workers = 3;
         public static string[] BinaryTypes { get; } = new string[]
         {
             // CJV = LUOBU

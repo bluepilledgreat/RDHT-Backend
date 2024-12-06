@@ -38,6 +38,8 @@ namespace RDHT_Backend
             }
 #endif
 
+            Config.Fetch();
+
             if (Directory.Exists(Globals.ClonePath))
             {
                 Console.WriteLine("Deleting existing clone folder...");
@@ -68,7 +70,7 @@ namespace RDHT_Backend
             WorkerFactory factory = new WorkerFactory(channels, repo, changed);
             List<Task> workers = new List<Task>();
 
-            for (int i = 1; i <= Globals.Workers; i++)
+            for (int i = 1; i <= Config.Instance.WorkerCount; i++)
                 workers.Add(factory.Create());
 
             // wait for workers to complete

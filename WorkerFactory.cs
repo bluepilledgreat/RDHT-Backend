@@ -30,7 +30,7 @@ namespace RDHT_Backend
 
             foreach (string binaryType in Globals.BinaryTypes)
             {
-                for (int i = 1; i <= 3; i++)
+                for (int i = 1; i <= Config.Instance.MaxChannelGetRetries; i++)
                 {
                     var req = await Globals.Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
                     string response = await req.Content.ReadAsStringAsync();
@@ -52,8 +52,8 @@ namespace RDHT_Backend
                     }
                     else if (response.Contains("Too many requests"))
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Ratelimited! Waiting a minute... ({i})");
-                        await Task.Delay(60 * 1000);
+                        Console.WriteLine($"[{channel}] {binaryType} Ratelimited! Waiting for {Config.Instance.RatelimitWaitTime}s... ({i})");
+                        await Task.Delay(Config.Instance.RatelimitWaitTime * 1000);
                         continue;
                     }
                     else if (!req.IsSuccessStatusCode)
