@@ -28,7 +28,7 @@ jobs:
     - name: Publish
       run: dotnet publish -p:PublishSingleFile=true -r ${{ matrix.platform }} -c ${{ matrix.configuration }} --self-contained false ./RDHT-Backend.csproj
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: RDHT-Backend (${{ matrix.configuration }}, ${{ matrix.platform }})
         path: |
