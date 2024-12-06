@@ -50,6 +50,12 @@ namespace RDHT_Backend
                         Environment.Exit(1337);
                         throw new Exception("CLIENTSETTINGS IS DEAD!!!");
                     }
+                    else if (response.Contains("Too many requests"))
+                    {
+                        Console.WriteLine($"[{channel}] {binaryType} Ratelimited! Waiting a minute... ({i})");
+                        await Task.Delay(60 * 1000);
+                        continue;
+                    }
                     else if (!req.IsSuccessStatusCode)
                     {
                         Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}]");
