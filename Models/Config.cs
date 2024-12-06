@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RDHT_Backend.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace RDHT_Backend.Models
         public int WorkerCount { get; set; } = 3;
         public int MaxChannelGetRetries { get; set; } = 3;
         public int RatelimitWaitTime { get; set; } = 15;
+        public ClientSettingsUrl ClientSettingsUrl { get; set; } = ClientSettingsUrl.Both;
 
         public static async Task Fetch()
         {

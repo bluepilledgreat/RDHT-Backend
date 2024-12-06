@@ -1,4 +1,5 @@
 ﻿using LibGit2Sharp;
+using RDHT_Backend.Enums;
 using RDHT_Backend.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,8 @@ namespace RDHT_Backend
 {
     internal class WorkerFactory
     {
+        private static uint _SubCount = 0;
+
         private Queue<string> _Channels;
         private Repository _Repository;
         private List<string> _Changed;
@@ -24,6 +27,22 @@ namespace RDHT_Backend
             _Changed = changed;
         }
 
+        private static string GetClientSettingsSub()
+        {
+            switch (Config.Instance.ClientSettingsUrl)
+            {
+                case ClientSettingsUrl.Roblox:
+                    return "clientsettings";
+                case ClientSettingsUrl.CDN:
+                    return "clientsettingscdn";
+                case ClientSettingsUrl.Both:
+                    uint i = Interlocked.Increment(ref _SubCount);
+                    return i % 2 == 0 ? "clientsettings" : "clientsettingscdn";
+                default:
+                    throw new Exception($"Unknown url type: {Config.Instance.ClientSettingsUrl}");
+            }
+        }
+
         private async Task<IEnumerable<string>> GetOutput(string channel)
         {
             List<string> output = new List<string>();
@@ -32,14 +51,17 @@ namespace RDHT_Backend
             {
                 for (int i = 1; i <= Config.Instance.MaxChannelGetRetries; i++)
                 {
-                    var req = await Globals.Client.GetAsync($"https://clientsettings.roblox.com/v2/client-version/{binaryType}/channel/{channel}");
+                    string url = $"https://{GetClientSettingsSub()}.roblox.com/v2/client-version/{binaryType}/channel/{channel}";
+                    //Console.WriteLine(url);
+
+                    var req = await Globals.Client.GetAsync(url);
                     string response = await req.Content.ReadAsStringAsync();
 
                     // sometimes clientsettings dies and responds with '{"errors":[{"code":0,"message":"InternalServerError"}]}'
                     // retry if InternalServerError is the status code and "InternalServerError" is in response, since i dont want to parse json
                     if (req.StatusCode == HttpStatusCode.InternalServerError && response.Contains("InternalServerError"))
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Death, retry {i} ({req.StatusCode}) [{response}]");
+                        Console.WriteLine($"[{channel}] {binaryType} Death, retry {i} ({req.StatusCode}) [{response}] [{url}]");
                         continue;
                     }
                     // sometimes clientsettings dies [2]
@@ -52,13 +74,13 @@ namespace RDHT_Backend
                     }
                     else if (response.Contains("Too many requests"))
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Ratelimited! Waiting for {Config.Instance.RatelimitWaitTime}s... ({i})");
+                        Console.WriteLine($"[{channel}] {binaryType} Ratelimited! Waiting for {Config.Instance.RatelimitWaitTime}s... ({i}) [{url}]");
                         await Task.Delay(Config.Instance.RatelimitWaitTime * 1000);
                         continue;
                     }
                     else if (!req.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}]");
+                        Console.WriteLine($"[{channel}] {binaryType} Failure ({req.StatusCode}) [{response}] [{url}]");
                         break;
                     }
 

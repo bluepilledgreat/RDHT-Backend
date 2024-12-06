@@ -1,5 +1,6 @@
 {
 	"WorkerCount": 3,
 	"MaxChannelGetRetries": 5,
-	"RatelimitWaitTime": 32
+	"RatelimitWaitTime": 32,
+	"ClientSettingsUrl": "Both"
 }
