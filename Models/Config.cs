@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -16,6 +17,19 @@ namespace RDHT_Backend.Models
         public int MaxChannelGetRetries { get; set; } = 3;
         public int RatelimitWaitTime { get; set; } = 15;
         public ClientSettingsUrl ClientSettingsUrl { get; set; } = ClientSettingsUrl.Both;
+
+        private static void PrintSettings()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Settings:");
+
+            foreach (var prop in typeof(Config).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                Console.WriteLine($"{prop.Name}: {prop.GetValue(Instance)}");
+            }
+
+            Console.WriteLine();
+        }
 
         public static async Task Fetch()
         {
@@ -34,6 +48,7 @@ namespace RDHT_Backend.Models
             }
 
             Instance = JsonSerializer.Deserialize<Config>(contents) ?? throw new Exception($"Failed to deserialize config");
+            PrintSettings();
         }
     }
 }
